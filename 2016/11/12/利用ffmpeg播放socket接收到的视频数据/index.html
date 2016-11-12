@@ -1,0 +1,736 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ffmpeg," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="ffmpeg安装ffmpeg是开源跨平台的音视频项目，源码获取可以从官网https://www.ffmpeg.org/download.html获取，因为ffmpeg的更新导致借口变更的很频繁，因此开发前需要注意ffmpeg的版本号。此文提供源码在ffmpeg 3.2版本,ubuntu14.04环境下可以运行。安装步骤如下：123456$ git clone https://git.ffmpeg.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用ffmpeg播放socket接收到的视频数据">
+<meta property="og:url" content="https://pacja.github.io/2016/11/12/利用ffmpeg播放socket接收到的视频数据/index.html">
+<meta property="og:site_name" content="pacja's blog">
+<meta property="og:description" content="ffmpeg安装ffmpeg是开源跨平台的音视频项目，源码获取可以从官网https://www.ffmpeg.org/download.html获取，因为ffmpeg的更新导致借口变更的很频繁，因此开发前需要注意ffmpeg的版本号。此文提供源码在ffmpeg 3.2版本,ubuntu14.04环境下可以运行。安装步骤如下：123456$ git clone https://git.ffmpeg.">
+<meta property="og:updated_time" content="2016-11-12T15:40:03.060Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="利用ffmpeg播放socket接收到的视频数据">
+<meta name="twitter:description" content="ffmpeg安装ffmpeg是开源跨平台的音视频项目，源码获取可以从官网https://www.ffmpeg.org/download.html获取，因为ffmpeg的更新导致借口变更的很频繁，因此开发前需要注意ffmpeg的版本号。此文提供源码在ffmpeg 3.2版本,ubuntu14.04环境下可以运行。安装步骤如下：123456$ git clone https://git.ffmpeg.">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="https://pacja.github.io/2016/11/12/利用ffmpeg播放socket接收到的视频数据/"/>
+
+
+  <title> 利用ffmpeg播放socket接收到的视频数据 | pacja's blog </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?fd8cfe28effabf4ae2e7348381f286c8";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">pacja's blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                利用ffmpeg播放socket接收到的视频数据
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-11-12T22:09:24+08:00" content="2016-11-12">
+              2016-11-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/c/" itemprop="url" rel="index">
+                    <span itemprop="name">c++</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/11/12/利用ffmpeg播放socket接收到的视频数据/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/11/12/利用ffmpeg播放socket接收到的视频数据/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o"></i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="ffmpeg安装"><a href="#ffmpeg安装" class="headerlink" title="ffmpeg安装"></a>ffmpeg安装</h2><p>ffmpeg是开源跨平台的音视频项目，源码获取可以从官网<a href="https://www.ffmpeg.org/download.html" target="_blank" rel="external">https://www.ffmpeg.org/download.html</a>获取，因为ffmpeg的更新导致借口变更的很频繁，因此开发前需要注意ffmpeg的版本号。此文提供源码在ffmpeg 3.2版本,ubuntu14.04环境下可以运行。<br>安装步骤如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$ git <span class="built_in">clone</span> https://git.ffmpeg.org/ffmpeg.git ffmpeg</div><div class="line">$ <span class="built_in">cd</span> ffmpeg</div><div class="line">$ sudo apt-get install yasm</div><div class="line">$ ./configure --enable-shared --prefix=/usr/<span class="built_in">local</span>/ffmpeg</div><div class="line">$ make</div><div class="line">$ sudo make install</div></pre></td></tr></table></figure></p>
+<p>安装完成后在/usr/local/ffmpeg出现三个目录：  </p>
+<ol>
+<li>bin：可执行文件目录  </li>
+<li>lib：动态链接库目录  </li>
+<li>include：编程用到的头文件目录<br>不管是编程还是可执行程序的执行都需要依赖lib下面的动态库，可以把里面的so文件拷贝到/usr/lib下，但可以直接修改配置文件。查看/etc/ld.so.conf文件  </li>
+</ol>
+<p>include ld.so.conf.d/*.conf<br>表明其包含了ld.so.conf.d下所有的conf文件，于是可以在/etc/ld.so.conf.d/创建一个新的文件ffmpeg.conf，其中包含一句话，即为ffmpeg的lib目录：  </p>
+<p>/usr/local/ffmpeg/lib<br>再执行ldconfig，更新ld.so.cache，使修改生效。  </p>
+<p>为了在任何地方能够直接用ffmpeg运行，而不用使用如./ffmpeg或者 /usr/local/ffmpeg/bin/ffmpeg的方式运行程序，可以把可执行程序复制到bin目录下，这里选择在bin目录下创建软链接。软链接类似于Windows下的快捷方式，如果原可执行程序被删除了，软链接也不能继续使用，而硬链接则可以继续使用。创建链接命令如下：  </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ sudo ln <span class="_">-s</span> /usr/<span class="built_in">local</span>/ffmpeg/bin/ffmpeg /usr/<span class="built_in">local</span>/bin/</div><div class="line">$ sudo ln <span class="_">-s</span> /usr/<span class="built_in">local</span>/ffmpeg/bin/ffprobe /usr/<span class="built_in">local</span>/bin/</div><div class="line">$ sudo ln <span class="_">-s</span> /usr/<span class="built_in">local</span>/ffmpeg/bin/ffserver /usr/<span class="built_in">local</span>/bin/</div></pre></td></tr></table></figure>
+<h2 id="利用ffmpeg开发"><a href="#利用ffmpeg开发" class="headerlink" title="利用ffmpeg开发"></a>利用ffmpeg开发</h2><p>ffmpeg开发，我本人是从<a href="http://blog.csdn.net/leixiaohua1020" target="_blank" rel="external">博客:http://blog.csdn.net/leixiaohua1020</a>入门的。内容介绍的很详细，把相关的博客看一遍，最起码能知道ffmpeg的大概工作方式。<br>因为本文要实现的是利用ffmpeg解码播放socket接收的数据，因此多余的就不说了，直接上代码：<br>服务器:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span>  </span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span>  </span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;errno.h&gt;</span>  </span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span>  </span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span>  </span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;netinet/in.h&gt;</span>  </span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/socket.h&gt;</span>  </span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/wait.h&gt;</span>  </span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span>  </span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;arpa/inet.h&gt;</span>  </span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> MAXBUF 1024  </span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span>  </span></div><div class="line">&#123;  </div><div class="line">    <span class="keyword">int</span> sockfd, new_fd;  </div><div class="line">    <span class="keyword">socklen_t</span> len;  </div><div class="line">    FILE *stream;</div><div class="line"></div><div class="line">    <span class="comment">/* struct sockaddr_in my_addr, their_addr; */</span> <span class="comment">// IPv4  </span></div><div class="line">    <span class="keyword">struct</span> sockaddr_in6 my_addr, their_addr; <span class="comment">// IPv6  ,my_addr服务器地址</span></div><div class="line">  </div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> myport, lisnum;  </div><div class="line">    <span class="keyword">char</span> buf[MAXBUF + <span class="number">1</span>];  </div><div class="line">    <span class="comment">//argv[1]服务器端口号</span></div><div class="line">    <span class="keyword">if</span> (argv[<span class="number">1</span>])  </div><div class="line">        myport = atoi(argv[<span class="number">1</span>]);  </div><div class="line">    <span class="keyword">else</span>  </div><div class="line">        myport = <span class="number">7838</span>;  </div><div class="line">  </div><div class="line">    <span class="keyword">if</span> (argv[<span class="number">2</span>])  </div><div class="line">        lisnum = atoi(argv[<span class="number">2</span>]);  </div><div class="line">    <span class="keyword">else</span>  </div><div class="line">        lisnum = <span class="number">2</span>;  </div><div class="line">  </div><div class="line">    <span class="comment">/* if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) == -1) &#123; */</span> <span class="comment">// IPv4  </span></div><div class="line">    <span class="keyword">if</span> ((sockfd = socket(PF_INET6, SOCK_STREAM, <span class="number">0</span>)) == <span class="number">-1</span>) &#123; <span class="comment">// IPv6  </span></div><div class="line">        perror(<span class="string">"socket"</span>);  </div><div class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);  </div><div class="line">    &#125; <span class="keyword">else</span>  </div><div class="line">        <span class="built_in">printf</span>(<span class="string">"socket created\n"</span>);  </div><div class="line">  </div><div class="line">    bzero(&amp;my_addr, <span class="keyword">sizeof</span>(my_addr));  </div><div class="line">    <span class="comment">/* my_addr.sin_family = PF_INET; */</span> <span class="comment">// IPv4  </span></div><div class="line">    my_addr.sin6_family = PF_INET6;    <span class="comment">// IPv6  </span></div><div class="line">    <span class="comment">/* my_addr.sin_port = htons(myport); */</span> <span class="comment">// IPv4  </span></div><div class="line">    my_addr.sin6_port = htons(myport);   <span class="comment">// IPv6  </span></div><div class="line"></div><div class="line">    <span class="keyword">if</span> (argv[<span class="number">3</span>])</div><div class="line">        <span class="comment">/* my_addr.sin_addr.s_addr = inet_addr(argv[3]); */</span> <span class="comment">// IPv4  </span></div><div class="line">        inet_pton(AF_INET6, argv[<span class="number">3</span>], &amp;my_addr.sin6_addr);  <span class="comment">// IPv6  </span></div><div class="line">    <span class="keyword">else</span>  </div><div class="line">        <span class="comment">/* my_addr.sin_addr.s_addr = INADDR_ANY; */</span> <span class="comment">// IPv4  </span></div><div class="line">        my_addr.sin6_addr = in6addr_any;            <span class="comment">// IPv6  </span></div><div class="line">  </div><div class="line">    <span class="comment">/* if (bind(sockfd, (struct sockaddr *) &amp;my_addr, sizeof(struct sockaddr)) */</span> <span class="comment">// IPv4  </span></div><div class="line">    <span class="keyword">if</span> (bind(sockfd, (<span class="keyword">struct</span> sockaddr *) &amp;my_addr, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in6))== <span class="number">-1</span>) &#123;</div><div class="line">        perror(<span class="string">"bind"</span>);  </div><div class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);  </div><div class="line">    &#125; <span class="keyword">else</span>  </div><div class="line">        <span class="built_in">printf</span>(<span class="string">"binded\n"</span>);  </div><div class="line">  </div><div class="line">    <span class="keyword">if</span> (listen(sockfd, lisnum) == <span class="number">-1</span>) &#123;  </div><div class="line">        perror(<span class="string">"listen"</span>);  </div><div class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);  </div><div class="line">    &#125; <span class="keyword">else</span>  </div><div class="line">        <span class="built_in">printf</span>(<span class="string">"begin listen\n"</span>);  </div><div class="line">  </div><div class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</div><div class="line">        len = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr);</div><div class="line">        <span class="keyword">if</span> ((new_fd = accept(sockfd, (<span class="keyword">struct</span> sockaddr *) &amp;their_addr, &amp;len)) == <span class="number">-1</span>) &#123;</div><div class="line">            perror(<span class="string">"accept"</span>);</div><div class="line">            <span class="built_in">exit</span>(errno);</div><div class="line">        &#125; <span class="keyword">else</span></div><div class="line">            <span class="built_in">printf</span>(<span class="string">"server: got connection from %s, port %d, socket %d\n"</span>,</div><div class="line">                    <span class="comment">/* inet_ntoa(their_addr.sin_addr), */</span> <span class="comment">// IPv4</span></div><div class="line">                   inet_ntop(AF_INET6, &amp;their_addr.sin6_addr, buf, <span class="keyword">sizeof</span>(buf)), <span class="comment">// IPv6  </span></div><div class="line">                    <span class="comment">/* ntohs(their_addr.sin_port), new_fd); */</span> <span class="comment">// IPv4</span></div><div class="line">                   their_addr.sin6_port, new_fd); <span class="comment">// IPv6  </span></div><div class="line"></div><div class="line"></div><div class="line">        <span class="comment">//打开文件</span></div><div class="line">        <span class="keyword">if</span> ((stream = fopen(<span class="string">"doctor_strange.flv"</span>, <span class="string">"rb"</span>)) == <span class="literal">NULL</span>) &#123;</div><div class="line">            <span class="built_in">printf</span>(<span class="string">"The file doctor_strange.flv not opend!"</span>);</div><div class="line">            <span class="built_in">exit</span>(<span class="number">1</span>);</div><div class="line">        &#125; <span class="keyword">else</span></div><div class="line">            <span class="built_in">printf</span>(<span class="string">"open file:doctor_strange.flv"</span>);</div><div class="line">        <span class="comment">/* 开始处理每个新连接上的数据收发 */</span></div><div class="line">        bzero(buf, MAXBUF);</div><div class="line"></div><div class="line">        <span class="keyword">int</span> lengsize = <span class="number">0</span>;</div><div class="line">        <span class="keyword">while</span> ((lengsize = fread(buf, <span class="number">1</span>, <span class="number">1024</span>, stream)) &gt; <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">if</span> (send(new_fd, buf, lengsize, <span class="number">0</span>) &lt; <span class="number">0</span>) &#123;</div><div class="line">                <span class="built_in">printf</span>(<span class="string">"send file failed!"</span>);</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            &#125;</div><div class="line">            bzero(buf, MAXBUF);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (fclose(stream)) &#123;</div><div class="line">            <span class="built_in">printf</span>(<span class="string">"File data not closed\n"</span>);</div><div class="line">            <span class="built_in">exit</span>(<span class="number">1</span>);</div><div class="line">        &#125;</div><div class="line">        close(new_fd);</div><div class="line">    &#125;</div><div class="line">    close(sockfd);</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>客户端：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div><div class="line">208</div><div class="line">209</div><div class="line">210</div><div class="line">211</div><div class="line">212</div><div class="line">213</div><div class="line">214</div><div class="line">215</div><div class="line">216</div><div class="line">217</div><div class="line">218</div><div class="line">219</div><div class="line">220</div><div class="line">221</div><div class="line">222</div><div class="line">223</div><div class="line">224</div><div class="line">225</div><div class="line">226</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 本程序实现对内存中数据的读写并播放</div><div class="line"> * 2016-11-03</div><div class="line"> *</div><div class="line"> */</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> __STDC_CONSTANT_MACROS</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> _WIN32</span></div><div class="line"><span class="comment">//Windows</span></div><div class="line"><span class="keyword">extern</span> <span class="string">"C"</span></div><div class="line">&#123;</div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"libavcodec/avcodec.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"libavformat/avformat.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"libswscale/swscale.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"SDL/SDL.h"</span></span></div><div class="line">&#125;;</div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line"><span class="comment">//Linux...</span></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __cplusplus</span></div><div class="line"><span class="keyword">extern</span> <span class="string">"C"</span></div><div class="line">&#123;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;libavcodec/avcodec.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;libavformat/avformat.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;libswscale/swscale.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;SDL/SDL.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;errno.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/socket.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;resolv.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;netinet/in.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;arpa/inet.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __cplusplus</span></div><div class="line">&#125;;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> MAXBUF 1024</span></div><div class="line"><span class="comment">//Output YUV420P </span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> OUTPUT_YUV420P 0</span></div><div class="line"><span class="comment">//FILE *fp_open=NULL;</span></div><div class="line"><span class="keyword">int</span> sockfd;</div><div class="line"></div><div class="line"><span class="comment">//Callback</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">read_buffer</span><span class="params">(<span class="keyword">void</span> *opaque, <span class="keyword">uint8_t</span> *buf, <span class="keyword">int</span> buf_size)</span></span>&#123;</div><div class="line">    <span class="comment">/* 接收对方发过来的文件*/</span></div><div class="line">    <span class="keyword">int</span> true_size;</div><div class="line">    <span class="keyword">if</span> (true_size=recv(sockfd,buf,buf_size,<span class="number">0</span>))&#123;</div><div class="line">        <span class="keyword">return</span> true_size;</div><div class="line">	&#125;<span class="keyword">else</span>&#123;</div><div class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>* argv[])</span></span></div><div class="line">&#123;</div><div class="line">    <span class="comment">//socket</span></div><div class="line">    <span class="keyword">struct</span> sockaddr_in6 dest;      <span class="comment">// IPv6</span></div><div class="line"></div><div class="line">    <span class="keyword">if</span> (argc != <span class="number">3</span>) &#123;</div><div class="line">        <span class="built_in">printf</span></div><div class="line">                (<span class="string">"参数格式错误！正确用法如下：\n\t\t%s IP地址 端口\n\t比如:\t%s 127.0.0.1 80\n此程序用来从某个 IP 地址的服务器某个端口接收最多 MAXBUF 个字节的消息"</span>,</div><div class="line">                 argv[<span class="number">0</span>], argv[<span class="number">0</span>]);</div><div class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> ((sockfd = socket(AF_INET6, SOCK_STREAM, <span class="number">0</span>)) &lt; <span class="number">0</span>) &#123;      <span class="comment">// IPv6</span></div><div class="line">        perror(<span class="string">"Socket"</span>);</div><div class="line">        <span class="built_in">exit</span>(errno);</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">printf</span>(<span class="string">"socket created\n"</span>);</div><div class="line"></div><div class="line">    <span class="comment">/* 初始化服务器端（对方）的地址和端口信息 */</span></div><div class="line">    bzero(&amp;dest, <span class="keyword">sizeof</span>(dest));</div><div class="line">    dest.sin6_family = AF_INET6;     <span class="comment">// IPv6</span></div><div class="line">    dest.sin6_port = htons(atoi(argv[<span class="number">2</span>]));     <span class="comment">// IPv6</span></div><div class="line">    <span class="keyword">if</span> ( inet_pton(AF_INET6, argv[<span class="number">1</span>], &amp;dest.sin6_addr) &lt; <span class="number">0</span> ) &#123;                 <span class="comment">// IPv6</span></div><div class="line">        perror(argv[<span class="number">1</span>]);</div><div class="line">        <span class="built_in">exit</span>(errno);</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">printf</span>(<span class="string">"address created\n"</span>);</div><div class="line"></div><div class="line">    <span class="comment">/* 连接服务器 */</span></div><div class="line">    <span class="keyword">if</span> (connect(sockfd, (<span class="keyword">struct</span> sockaddr *) &amp;dest, <span class="keyword">sizeof</span>(dest)) != <span class="number">0</span>) &#123;</div><div class="line">        perror(<span class="string">"Connect "</span>);</div><div class="line">        <span class="built_in">exit</span>(errno);</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">printf</span>(<span class="string">"server connected\n"</span>);</div><div class="line">	AVFormatContext	*pFormatCtx;</div><div class="line">	<span class="keyword">int</span>				i, videoindex;</div><div class="line">	AVCodecContext	*pCodecCtx;</div><div class="line">	AVCodec			*pCodec;</div><div class="line">	<span class="comment">//char filepath[]="1.mp4";</span></div><div class="line"></div><div class="line">	av_register_all();</div><div class="line">	avformat_network_init();</div><div class="line">	pFormatCtx = avformat_alloc_context();</div><div class="line"></div><div class="line">	<span class="comment">//fp_open=fopen(filepath,"rb+");</span></div><div class="line">	<span class="comment">//Init AVIOContext</span></div><div class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> *aviobuffer=(<span class="keyword">unsigned</span> <span class="keyword">char</span> *)av_malloc(<span class="number">32768</span>);</div><div class="line">	AVIOContext *avio =avio_alloc_context(aviobuffer, <span class="number">32768</span>,<span class="number">0</span>,<span class="literal">NULL</span>,read_buffer,<span class="literal">NULL</span>,<span class="literal">NULL</span>);</div><div class="line">	pFormatCtx-&gt;pb=avio;</div><div class="line"></div><div class="line">	<span class="keyword">if</span>(avformat_open_input(&amp;pFormatCtx,<span class="literal">NULL</span>,<span class="literal">NULL</span>,<span class="literal">NULL</span>)!=<span class="number">0</span>)&#123;</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"Couldn't open input stream.\n"</span>);</div><div class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span>(avformat_find_stream_info(pFormatCtx,<span class="literal">NULL</span>)&lt;<span class="number">0</span>)&#123;</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"Couldn't find stream information.\n"</span>);</div><div class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">	&#125;</div><div class="line">	videoindex=<span class="number">-1</span>;</div><div class="line">	<span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;pFormatCtx-&gt;nb_streams; i++) </div><div class="line">		<span class="keyword">if</span>(pFormatCtx-&gt;streams[i]-&gt;codec-&gt;codec_type==AVMEDIA_TYPE_VIDEO)&#123;</div><div class="line">			videoindex=i;</div><div class="line">			<span class="keyword">break</span>;</div><div class="line">		&#125;</div><div class="line">	<span class="keyword">if</span>(videoindex==<span class="number">-1</span>)&#123;</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"Didn't find a video stream.\n"</span>);</div><div class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">	&#125;</div><div class="line">	pCodecCtx=pFormatCtx-&gt;streams[videoindex]-&gt;codec;</div><div class="line">	pCodec=avcodec_find_decoder(pCodecCtx-&gt;codec_id);</div><div class="line">	<span class="keyword">if</span>(pCodec==<span class="literal">NULL</span>)&#123;</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"Codec not found.\n"</span>);</div><div class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span>(avcodec_open2(pCodecCtx, pCodec,<span class="literal">NULL</span>)&lt;<span class="number">0</span>)&#123;</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"Could not open codec.\n"</span>);</div><div class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">	&#125;</div><div class="line">	AVFrame	*pFrame,*pFrameYUV;</div><div class="line">	pFrame=av_frame_alloc();</div><div class="line">	pFrameYUV=av_frame_alloc();</div><div class="line">	<span class="comment">//uint8_t *out_buffer=(uint8_t *)av_malloc(avpicture_get_size(AV_PIX_FMT_YUV420P, pCodecCtx-&gt;width, pCodecCtx-&gt;height));</span></div><div class="line">	<span class="comment">//avpicture_fill((AVPicture *)pFrameYUV, out_buffer, AV_PIX_FMT_YUV420P, pCodecCtx-&gt;width, pCodecCtx-&gt;height);</span></div><div class="line">	<span class="comment">//SDL----------------------------</span></div><div class="line">	<span class="keyword">if</span>(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER)) &#123;  </div><div class="line">		<span class="built_in">printf</span>( <span class="string">"Could not initialize SDL - %s\n"</span>, SDL_GetError()); </div><div class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">	&#125; </div><div class="line"></div><div class="line">	<span class="keyword">int</span> screen_w=<span class="number">0</span>,screen_h=<span class="number">0</span>;</div><div class="line">	SDL_Surface *screen; </div><div class="line">	screen_w = pCodecCtx-&gt;width;</div><div class="line">	screen_h = pCodecCtx-&gt;height;</div><div class="line">	screen = SDL_SetVideoMode(screen_w, screen_h, <span class="number">0</span>,<span class="number">0</span>);</div><div class="line"></div><div class="line">	<span class="keyword">if</span>(!screen) &#123;  </div><div class="line">		<span class="built_in">printf</span>(<span class="string">"SDL: could not set video mode - exiting:%s\n"</span>,SDL_GetError());  </div><div class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">	&#125;</div><div class="line">	SDL_Overlay *bmp; </div><div class="line">	bmp = SDL_CreateYUVOverlay(pCodecCtx-&gt;width, pCodecCtx-&gt;height,SDL_YV12_OVERLAY, screen); </div><div class="line">	SDL_Rect rect;</div><div class="line">	rect.x = <span class="number">0</span>;    </div><div class="line">	rect.y = <span class="number">0</span>;    </div><div class="line">	rect.w = screen_w;    </div><div class="line">	rect.h = screen_h;  </div><div class="line">	<span class="comment">//SDL End------------------------</span></div><div class="line">	<span class="keyword">int</span> ret, got_picture;</div><div class="line"></div><div class="line">	AVPacket *packet=(AVPacket *)av_malloc(<span class="keyword">sizeof</span>(AVPacket));</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> OUTPUT_YUV420P </span></div><div class="line">    FILE *fp_yuv=fopen(<span class="string">"output.yuv"</span>,<span class="string">"wb+"</span>);  </div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span>  </span></div><div class="line">	SDL_WM_SetCaption(<span class="string">"Simplest FFmpeg Mem Player"</span>,<span class="literal">NULL</span>);</div><div class="line"></div><div class="line">	<span class="keyword">struct</span> SwsContext *img_convert_ctx;</div><div class="line">	img_convert_ctx = sws_getContext(pCodecCtx-&gt;width, pCodecCtx-&gt;height, pCodecCtx-&gt;pix_fmt, pCodecCtx-&gt;width, pCodecCtx-&gt;height, AV_PIX_FMT_YUV420P, SWS_BICUBIC, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>); </div><div class="line">	<span class="comment">//------------------------------</span></div><div class="line">	<span class="keyword">while</span>(av_read_frame(pFormatCtx, packet)&gt;=<span class="number">0</span>)&#123;</div><div class="line">		<span class="keyword">if</span>(packet-&gt;stream_index==videoindex)&#123;</div><div class="line">			ret = avcodec_decode_video2(pCodecCtx, pFrame, &amp;got_picture, packet);</div><div class="line">			<span class="keyword">if</span>(ret &lt; <span class="number">0</span>)&#123;</div><div class="line">				<span class="built_in">printf</span>(<span class="string">"Decode Error.\n"</span>);</div><div class="line">				<span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">			&#125;</div><div class="line">			<span class="keyword">if</span>(got_picture)&#123;</div><div class="line">				SDL_LockYUVOverlay(bmp);</div><div class="line">				pFrameYUV-&gt;data[<span class="number">0</span>]=bmp-&gt;pixels[<span class="number">0</span>];</div><div class="line">				pFrameYUV-&gt;data[<span class="number">1</span>]=bmp-&gt;pixels[<span class="number">2</span>];</div><div class="line">				pFrameYUV-&gt;data[<span class="number">2</span>]=bmp-&gt;pixels[<span class="number">1</span>];     </div><div class="line">				pFrameYUV-&gt;linesize[<span class="number">0</span>]=bmp-&gt;pitches[<span class="number">0</span>];</div><div class="line">				pFrameYUV-&gt;linesize[<span class="number">1</span>]=bmp-&gt;pitches[<span class="number">2</span>];   </div><div class="line">				pFrameYUV-&gt;linesize[<span class="number">2</span>]=bmp-&gt;pitches[<span class="number">1</span>];</div><div class="line">				sws_scale(img_convert_ctx, (<span class="keyword">const</span> <span class="keyword">uint8_t</span>* <span class="keyword">const</span>*)pFrame-&gt;data, pFrame-&gt;linesize, <span class="number">0</span>, pCodecCtx-&gt;height, pFrameYUV-&gt;data, pFrameYUV-&gt;linesize);</div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> OUTPUT_YUV420P</span></div><div class="line">				<span class="keyword">int</span> y_size=pCodecCtx-&gt;width*pCodecCtx-&gt;height;  </div><div class="line">				fwrite(pFrameYUV-&gt;data[<span class="number">0</span>],<span class="number">1</span>,y_size,fp_yuv);    <span class="comment">//Y </span></div><div class="line">				fwrite(pFrameYUV-&gt;data[<span class="number">1</span>],<span class="number">1</span>,y_size/<span class="number">4</span>,fp_yuv);  <span class="comment">//U</span></div><div class="line">				fwrite(pFrameYUV-&gt;data[<span class="number">2</span>],<span class="number">1</span>,y_size/<span class="number">4</span>,fp_yuv);  <span class="comment">//V</span></div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">				SDL_UnlockYUVOverlay(bmp); </div><div class="line"></div><div class="line">				SDL_DisplayYUVOverlay(bmp, &amp;rect); </div><div class="line">				<span class="comment">//Delay 40ms</span></div><div class="line">				SDL_Delay(<span class="number">40</span>);</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		av_free_packet(packet);</div><div class="line">	&#125;</div><div class="line">	sws_freeContext(img_convert_ctx);</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">if</span> OUTPUT_YUV420P </span></div><div class="line">    fclose(fp_yuv);</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span> </span></div><div class="line"></div><div class="line">	<span class="comment">//fclose(fp_open);</span></div><div class="line"></div><div class="line">	SDL_Quit();</div><div class="line"></div><div class="line">	<span class="comment">//av_free(out_buffer);</span></div><div class="line">	av_free(pFrameYUV);</div><div class="line">	avcodec_close(pCodecCtx);</div><div class="line">	avformat_close_input(&amp;pFormatCtx);</div><div class="line"></div><div class="line">	<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>程序基本原理很简单，就是将接收到的数据放到内存中，ffmpeg从内存中读取数据。以下是关键函数：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span> *aviobuffer=(<span class="keyword">unsigned</span> <span class="keyword">char</span> *)av_malloc(<span class="number">32768</span>);</div><div class="line">AVIOContext *avio =avio_alloc_context(aviobuffer,<span class="number">32768</span>,<span class="number">0</span>,<span class="literal">NULL</span>,read_buffer,<span class="literal">NULL</span>,<span class="literal">NULL</span>);</div></pre></td></tr></table></figure></p>
+<p>其中read_buffer就是需要实现的回调函数，本例中：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">read_buffer</span><span class="params">(<span class="keyword">void</span> *opaque, <span class="keyword">uint8_t</span> *buf, <span class="keyword">int</span> buf_size)</span></span>&#123;</div><div class="line">    <span class="comment">/* 接收对方发过来的文件*/</span></div><div class="line">    <span class="keyword">int</span> true_size;</div><div class="line">    <span class="keyword">if</span> (true_size=recv(sockfd,buf,buf_size,<span class="number">0</span>))&#123;</div><div class="line">        <span class="keyword">return</span> true_size;</div><div class="line">	&#125;<span class="keyword">else</span>&#123;</div><div class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>通过recv函数将socketfd接收到的数据放到buf中，如果你需要读取另外的数据，比如其他程序产生的数据而不是socket接收的数据，你只需要实现这个函数就行了。<br>完整源码：<a href="https://github.com/pacja/ffmpeg-socket" target="_blank" rel="external">https://github.com/pacja/ffmpeg-socket</a></p>
+<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>如果不是从socket接收数据，但是是从一个公共内存块中读取数据，比如一个线程往内存块中填写数据，另外一个线程读取数据并播放，则需要利用到生产者，消费者模型。但是变化只在read_buffer的实现上，其他并没有什么变化，生产者，消费者模型可以参见博客<a href="http://www.cnblogs.com/haippy/p/3252092.html" target="_blank" rel="external">http://www.cnblogs.com/haippy/p/3252092.html</a>,内容很详细。</p>
+<p>参考文章：  </p>
+<ol>
+<li><a href="http://www.cnblogs.com/haippy/p/3252092.html" target="_blank" rel="external">C++11 并发指南九(综合运用: C++11 多线程下生产者消费者模型详解)</a>  </li>
+<li><a href="http://blog.csdn.net/leixiaohua1020/article/details/12980423" target="_blank" rel="external">ffmpeg 从内存中读取数据（或将数据输出到内存）</a></li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ffmpeg/" rel="tag">#ffmpeg</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/28/python-Virtualenv的使用/" rel="next" title="python-Virtualenv的使用">
+                <i class="fa fa-chevron-left"></i> python-Virtualenv的使用
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/11/12/利用ffmpeg播放socket接收到的视频数据/"
+           data-title="利用ffmpeg播放socket接收到的视频数据" data-url="https://pacja.github.io/2016/11/12/利用ffmpeg播放socket接收到的视频数据/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/1.jpg"
+               alt="pacja" />
+          <p class="site-author-name" itemprop="name">pacja</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/pacja" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/3215975093" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ffmpeg安装"><span class="nav-number">1.</span> <span class="nav-text">ffmpeg安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#利用ffmpeg开发"><span class="nav-number">2.</span> <span class="nav-text">利用ffmpeg开发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#扩展"><span class="nav-number">3.</span> <span class="nav-text">扩展</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">pacja</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"pacja"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+  </script>
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+    });
+  </script>
+  <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  
+
+  
+
+  
+
+
+</body>
+</html>
